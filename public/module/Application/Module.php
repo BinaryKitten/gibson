@@ -74,6 +74,7 @@ class Module
         $ldapConfig = $config['ldap'];
         try {
             $ldap = new Ldap($ldapConfig);
+            $ldap->bind($ldapConfig['username'], $ldapConfig['password']);
         } catch (LdapException $e) {
             Debug::dump($e->getMessage());
             die();

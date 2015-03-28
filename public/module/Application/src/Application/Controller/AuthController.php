@@ -8,6 +8,7 @@ use Zend\Debug\Debug;
 use Zend\Http\PhpEnvironment\Response;
 use Zend\Ldap\Attribute as LdapAttribute;
 use Zend\Ldap\Exception\LdapException;
+use Zend\Ldap\Ldap as ZendLdap;
 use Zend\Mvc\Controller\AbstractActionController;
 use Zend\View\Model\ViewModel;
 use Zend\Authentication\AuthenticationService;
@@ -51,13 +52,16 @@ class AuthController extends AbstractActionController
                             LdapAttribute::setAttribute($entry, 'mail', $wpUser->user_email);
                             LdapAttribute::setAttribute($entry, 'objectClass', 'User');
                             LdapAttribute::setAttribute($entry, 'samAccountName', $wpUser->user_login);
-
+                            LdapAttribute::setPassword($entry, $password, LdapAttribute::PASSWORD_UNICODEPWD);
+                            LdapAttribute::setAttribute($entry, 'userAccountControl', 512);
 
 //                            $ldap = $ldapAdapter->getLdap();
+                            /** @var ZendLdap $ldap */
                             $ldap = $this->getServiceLocator()->get('ldap');
                             $dn = sprintf('CN=%s,CN=Users,DC=hackspace,DC=internal', $wpUser->user_login);
                             $ldap->add($dn, $entry);
 
+                            $dn = $ldap->getCanonicalAccountName($username, ZendLdap::ACCTNAME_FORM_DN);
                             $ldapPasswordArray = [];
                             LdapAttribute::setPassword($ldapPasswordArray, $password, LdapAttribute::PASSWORD_UNICODEPWD);
                             try {
