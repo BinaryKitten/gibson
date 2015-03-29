@@ -1,0 +1,17 @@
+{
+    "name": "binarykitten/arazu",
+    "description": "Arazu - God of Completed Construction - Core App Extensions for building ZF2 apps",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Kathryn Reeve",
+            "email": "kathryn@binarykitten.com"
+        }
+    ],
+    "require": {
+        "php": ">=5.5",
+        "zendframework/zendframework": "2.3.*",
+        "zf-commons/zfc-base": "~0.1"
+    },
+    "minimum-stability": "dev"
+}

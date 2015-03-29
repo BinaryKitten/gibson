@@ -1,0 +1,59 @@
+    <div class="container-fluid">
+        <div class="row">
+            <?php
+            $form = $this->loginForm;
+            $form->prepare();
+            $form->setAttribute('action', $this->url('login'));
+            $form->setAttribute('method', 'post');
+            $form->setAttribute('id', 'loginorm');
+            $form->setAttribute('class', 'form-vertical');
+            ?>
+            <?php echo $this->form()->openTag($form); ?>
+            <div class="control-group">
+                <?php
+                $message = $this->formElementErrors($form->get('username'));
+                $message .= $this->formElementErrors($form->get('password'));
+
+                if (!empty($message)) {
+                    echo "<p>" . $message . "</p>";
+                }
+                if ($this->flashMessenger()->hasMessages()) {
+                    ?>
+                    <ul class="flash-messages">
+                        <?php foreach ($this->flashMessenger()->getMessages() as $message) : ?>
+                            <li> <?= $message; ?></li>
+                        <?php endforeach; ?>
+                    </ul>
+                    <?php
+                    $this->flashMessenger()->clearMessages();
+                } ?>
+
+                <div class="controls">
+
+                    <div class="input-prepend">
+                        <span class="add-on"><i class="icon-user"></i></span>
+                        <?php echo $this->formInput($form->get('username')); ?>
+                    </div>
+                </div>
+            </div>
+            <div class="control-group">
+                <div class="controls">
+                    <div class="input-prepend">
+                        <span class="add-on"><i class="icon-lock"></i></span>
+                        <?php echo $this->formInput($credential = $form->get('password')); ?>
+                    </div>
+                </div>
+            </div>
+            <div class="form-actions">
+        <span class="pull-right"><?php
+            $button = $form->get('submit');
+            $button->setAttribute('class', 'btn btn-inverse');
+            echo $this->formButton($button);
+            ?></span>
+            </div>
+            <?php if ($this->redirect): ?>
+                <input type="hidden" name="redirect" value="<?php echo $this->escapeHtml($this->redirect) ?>"/>
+            <?php endif ?>
+            <?php echo $this->form()->closeTag() ?>
+        </div>
+    </div>

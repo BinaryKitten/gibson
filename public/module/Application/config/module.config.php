@@ -1,30 +1,11 @@
 <?php
 namespace Application;
 
+$routes = require __DIR__ . '/routes.config.php';
+
 return [
     'router' => [
-        'routes' => [
-            'home' => [
-                'type' => 'Zend\Mvc\Router\Http\Literal',
-                'options' => [
-                    'route'    => '/',
-                    'defaults' => [
-                        'controller' => 'Application\Controller\Index',
-                        'action'     => 'index',
-                    ],
-                ],
-            ],
-            'login' => [
-                'type'    => 'Literal',
-                'options' => [
-                    'route'    => '/login',
-                    'defaults' => [
-                        'controller'    => Controller\AuthController::class,
-                        'action'        => 'login',
-                    ],
-                ],
-            ]
-        ],
+        'routes' => $routes,
     ],
     'service_manager' => [
         'abstract_factories' => [
@@ -47,7 +28,7 @@ return [
     ],
     'controllers' => [
         'invokables' => [
-            'Application\Controller\Index' => 'Application\Controller\IndexController',
+            Controller\IndexController::class => Controller\IndexController::class,
             Controller\AuthController::class => Controller\AuthController::class
         ],
     ],
@@ -59,6 +40,7 @@ return [
         'exception_template'       => 'error/index',
         'template_map' => [
             'layout/layout'           => __DIR__ . '/../view/layout/layout.phtml',
+            'layout/auth'             => __DIR__ . '/../view/layout/auth.phtml',
             'application/index/index' => __DIR__ . '/../view/application/index/index.phtml',
             'error/404'               => __DIR__ . '/../view/error/404.phtml',
             'error/index'             => __DIR__ . '/../view/error/index.phtml',

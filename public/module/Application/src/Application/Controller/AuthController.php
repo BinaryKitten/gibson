@@ -10,11 +10,22 @@ use Zend\Ldap\Attribute as LdapAttribute;
 use Zend\Ldap\Exception\LdapException;
 use Zend\Ldap\Ldap as ZendLdap;
 use Zend\Mvc\Controller\AbstractActionController;
+use Zend\Session\Container;
 use Zend\View\Model\ViewModel;
-use Zend\Authentication\AuthenticationService;
+
 
 class AuthController extends AbstractActionController
 {
+
+    /** @var null|Container $wpSession  */
+    protected $wpSession = null;
+
+    public function __construct()
+    {
+
+        $this->wpSession = new Container('wp_auth');
+    }
+
     public function loginAction()
     {
 //        if($this->identity()->
@@ -41,6 +52,9 @@ class AuthController extends AbstractActionController
 
                         if ($wpResult->isValid()) {
                             $wpUser = $wpAdapter->getResultRowObject(null, array('user_pass'));
+                            $this->wpSession['wpUser'] = $wpUser;
+                            return $this->redirect()->toRoute('login/migrate'); //return redirection object
+
                             /** @var \Application\Mapper\WPUserMeta $wpMeta */
                             $wpMeta = $this->getServiceLocator()->get('mapper/wpusermeta');
                             $groups = unserialize($wpMeta->getMetaForUser($wpUser, 'wp_capabilities')->meta_value);
@@ -103,5 +117,9 @@ class AuthController extends AbstractActionController
                 'loginForm' => $form
             );
         }
+    }
+
+    public function migrate() {
+
     }
 }
