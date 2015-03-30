@@ -9,7 +9,8 @@ return [
     'route_layouts' => [
 //        'landing/index' => 'layout/landing',
 //        'form' => 'layout/application'
-//    'user/default' => 'layout/frank',
-    'login' => 'layout/auth'
+//        'user/default' => 'layout/frank',
+        'login' => 'layout/auth',
+        'register' => 'layout/auth',
     ]
 ];

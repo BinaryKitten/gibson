@@ -15,11 +15,12 @@ use Application\Mapper\WPUserMeta as WPUserMetaMapper;
 use Application\Model\WPUser as WPUserModel;
 use Application\Model\WPUserMeta as WPUserMetaModel;
 use Zend\Authentication\Adapter\Ldap as LdapAuthAdapter;
+use Zend\Authentication\AuthenticationService;
 use Zend\Debug\Debug;
 use Zend\Ldap\Exception\LdapException;
 use Zend\Ldap\Ldap;
-use Zend\Mvc\MvcEvent;
 use Zend\ServiceManager\ServiceManager;
+use Zend\Authentication\Storage\Session as AuthenticationSessionStorage;
 use Zend\Stdlib\Hydrator\ObjectProperty as ObjectPropertyHydrator;
 
 class Module
@@ -33,6 +34,7 @@ class Module
             'factories' => [
                 'ldap_auth_adapter' => [$this,'factory_auth_adapter_ldap'],
                 'ldap' => [$this,'factory_ldap'],
+                'service/auth' => [$this, 'factory_service_auth'],
                 'form/loginform' => [$this, 'factory_form_login'],
                 'mapper/wpuser' => [$this, 'factory_mapper_wpuser'],
                 'mapper/wpusermeta' => [$this, 'factory_mapper_wpusermeta'],
@@ -68,6 +70,19 @@ class Module
         return new LoginForm();
     }
 
+    /**
+     * @param ServiceManager $sm
+     * @return AuthenticationService
+     */
+    public function factory_service_auth(ServiceManager $sm)
+    {
+        return new AuthenticationService(new AuthenticationSessionStorage('Authentication'));
+    }
+
+    /**
+     * @param ServiceManager $sm
+     * @return Ldap
+     */
     public function factory_ldap(ServiceManager $sm)
     {
         $config = $sm->get('Config');
@@ -82,6 +97,7 @@ class Module
 
         return $ldap;
     }
+
 
     /**
      * @param ServiceManager $sm
@@ -109,6 +125,9 @@ class Module
         return $class;
     }
 
+    /**
+     * @return array
+     */
     public function getAutoloaderConfig()
     {
         return [
