@@ -2,23 +2,18 @@
 
 namespace Application\Controller;
 
-use Application\Mapper\WPUser as WPUserMapper;
-use Application\Model\WPUser;
 use Zend\Authentication\AuthenticationService;
-use Zend\Debug\Debug;
 use Zend\Http\PhpEnvironment\Response;
 use Zend\Ldap\Attribute as LdapAttribute;
-use Zend\Ldap\Exception\LdapException;
 use Zend\Ldap\Ldap as ZendLdap;
 use Zend\Mvc\Controller\AbstractActionController;
 use Zend\Session\Container;
-use Zend\View\Model\ViewModel;
 
 
 class AuthController extends AbstractActionController
 {
 
-    /** @var null|Container $wpSession  */
+    /** @var null|Container $wpSession */
     protected $wpSession = null;
 
     public function __construct()
@@ -63,6 +58,7 @@ class AuthController extends AbstractActionController
                             return $this->redirect()->refresh();
                         }
                     } else {
+                        $authService->getStorage()->write($ldapAdapter->getAccountObject());
                         return $this->redirect()->refresh();
                     }
                 }
@@ -81,9 +77,9 @@ class AuthController extends AbstractActionController
         }
         $wpUser = $this->wpSession->wpUser;
 
-        return $this->getResponse()->setContent(var_export($wpUser, true));
+//        return $this->getResponse()->setContent(var_export($wpUser, true));
 
-        $prg = $this->postRdirectGet('migration');
+        $prg = $this->postRedirectGet('login/migrate');
         if ($prg instanceof Response) {
             return $prg;
         } else {
@@ -93,37 +89,77 @@ class AuthController extends AbstractActionController
             //      set the user as logged in
             //      redirect to home
             // end if;
+            /** @var \Zend\Form\Form $form */
+            $form = $this->getServiceLocator()->get('form\migration');
+            if ($prg) {
+                $form->setData($prg);
+                $x = $form->getInputFilter();
+//                $d = \Zend\Debug\Debug::dump($x, 'inputFilter', false);
+                if ($form->isValid()) {
+//                    $this->flashMessenger()->addMessage('flop');
+//                    $this->flashMessenger()->addMessage($d);
+//                    return $this->redirect()->refresh();
 
-            /** @var \Application\Mapper\WPUserMeta $wpMeta */
-//            $wpMeta = $this->getServiceLocator()->get('mapper/wpusermeta');
+                    /** @var \Application\Mapper\WPUserMeta $wpMeta */
+                    $wpMeta = $this->getServiceLocator()->get('mapper/wpusermeta');
 //            $groups = unserialize($wpMeta->getMetaForUser($wpUser, 'wp_capabilities')->meta_value);
-//            $rfid = $wpMeta->getMetaForUser($wpUser, 'rfid_code')->meta_value;
+                    $rfid = $wpMeta->getMetaForUser($wpUser, 'rfid_code')->meta_value;
+                    $newPassword = $form->get('password')->getValue();
 //
-//            $entry = [];
-//            LdapAttribute::setAttribute($entry, 'cn', $wpUser->user_login);
-//            LdapAttribute::setAttribute($entry, 'rfidCode', $rfid);
-//            LdapAttribute::setAttribute($entry, 'mail', $wpUser->user_email);
-//            LdapAttribute::setAttribute($entry, 'objectClass', 'User');
-//            LdapAttribute::setAttribute($entry, 'samAccountName', $wpUser->user_login);
-//            LdapAttribute::setPassword($entry, $password, LdapAttribute::PASSWORD_UNICODEPWD);
-//            LdapAttribute::setAttribute($entry, 'userAccountControl', 512);
+                    $entry = [];
+                    LdapAttribute::setAttribute($entry, 'cn', $wpUser->user_login);
+                    LdapAttribute::setAttribute($entry, 'rfidCode', $rfid);
+                    LdapAttribute::setAttribute($entry, 'mail', $wpUser->user_email);
+                    LdapAttribute::setAttribute($entry, 'objectClass', 'User');
+                    LdapAttribute::setAttribute($entry, 'samAccountName', $wpUser->user_login);
+                    LdapAttribute::setPassword($entry, $newPassword, LdapAttribute::PASSWORD_UNICODEPWD);
+                    LdapAttribute::setAttribute($entry, 'userAccountControl', 512);
 //
 ////                            $ldap = $ldapAdapter->getLdap();
-//            /** @var ZendLdap $ldap */
-//            $ldap = $this->getServiceLocator()->get('ldap');
-//            $dn = sprintf('CN=%s,CN=Users,DC=hackspace,DC=internal', $wpUser->user_login);
-//            $ldap->add($dn, $entry);
-//
-//            $dn = $ldap->getCanonicalAccountName($username, ZendLdap::ACCTNAME_FORM_DN);
-//            $ldapPasswordArray = [];
-//            LdapAttribute::setPassword($ldapPasswordArray, $password, LdapAttribute::PASSWORD_UNICODEPWD);
-//            try {
-//                $ldap->update($dn, $ldapPasswordArray);
-//            } catch(LdapException $e) {
-//                Debug::dump($e->getMessage());
-//                die();
-//            }
+                    /** @var ZendLdap $ldap * */
+                    $ldap = $this->getServiceLocator()->get('ldap');
+                    $dn = sprintf('CN=%s,CN=Users,DC=hackspace,DC=internal', $wpUser->user_login);
+                    $ldap->save($dn, $entry);
+//                    $ldap->add($dn, $entry);
+
+                    /** @var \Zend\Authentication\AuthenticationService $authService */
+                    $authService = $this->getServiceLocator()->get('service/auth');
+                    /** @var \Zend\Authentication\Adapter\Ldap $ldapAuthAdapter */
+                    $ldapAuthAdapter = $this->getServiceLocator()->get('ldap_auth_adapter');
+
+                    $result = $ldapAuthAdapter->setIdentity($wpUser->user_login)->setCredential($newPassword)->authenticate();
+//                    $result = $authService->authenticate($ldapAuthAdapter);
+                    if ($result->isValid()) {
+//                        $data1 = \Zend\Debug\Debug::dump($result, 'result', true);
+//                        $data2 = \Zend\Debug\Debug::dump($ldapAuthAdapter->getAccountObject(), 'account', true);
+//                        return $this->getResponse()->setContent($data1 . $data2);
+                        $authService->getStorage()->write($ldapAuthAdapter->getAccountObject());
+                        return $this->redirect()->toRoute('login');
+                    }
+//                    return $this->redirect()->refresh();
+//                    $dn = $ldap->getCanonicalAccountName($username, ZendLdap::ACCTNAME_FORM_DN);
+//                    $ldapPasswordArray = [];
+//                    LdapAttribute::setPassword($ldapPasswordArray, $password, LdapAttribute::PASSWORD_UNICODEPWD);
+//                    try {
+//                        $ldap->update($dn, $ldapPasswordArray);
+//                    } catch (LdapException $e) {
+//                        Debug::dump($e->getMessage());
+//                        die();
+//                    }
+                }
+            }
         }
 
+        return array(
+            'migrationForm' => $form
+        );
+    }
+
+
+    public function logoutAction()
+    {
+        /** @var AuthenticationService $authService */
+        $authService = $this->getServiceLocator()->get('service/auth');
+        $authService->clearIdentity();
     }
 }

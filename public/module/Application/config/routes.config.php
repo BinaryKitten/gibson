@@ -35,6 +35,16 @@ return [
             ],
         ],
     ],
+    'logout' => [
+        'type' => 'Literal',
+        'options' => [
+            'route'    => '/logout',
+            'defaults' => [
+                'controller' => Controller\AuthController::class,
+                'action'     => 'logout',
+            ],
+        ],
+    ],
     'register' => [
         'type' => 'Literal',
         'options' => [

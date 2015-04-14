@@ -16,11 +16,15 @@ use Application\Model\WPUser as WPUserModel;
 use Application\Model\WPUserMeta as WPUserMetaModel;
 use Zend\Authentication\Adapter\Ldap as LdapAuthAdapter;
 use Zend\Authentication\AuthenticationService;
+use Zend\Authentication\Storage\Session as AuthenticationSessionStorage;
+use Zend\Console\Request as ConsoleRequest;
 use Zend\Debug\Debug;
 use Zend\Ldap\Exception\LdapException;
 use Zend\Ldap\Ldap;
+use Zend\Mvc\Controller\AbstractActionController;
+use Zend\Mvc\ModuleRouteListener;
+use Zend\Mvc\MvcEvent;
 use Zend\ServiceManager\ServiceManager;
-use Zend\Authentication\Storage\Session as AuthenticationSessionStorage;
 use Zend\Stdlib\Hydrator\ObjectProperty as ObjectPropertyHydrator;
 
 class Module
@@ -31,11 +35,15 @@ class Module
     public function getServiceConfig()
     {
         return [
+            'aliases' => [
+                'Zend\Authentication\AuthenticationService' => 'service/auth',
+            ],
             'factories' => [
-                'ldap_auth_adapter' => [$this,'factory_auth_adapter_ldap'],
-                'ldap' => [$this,'factory_ldap'],
+                'ldap_auth_adapter' => [$this, 'factory_auth_adapter_ldap'],
+                'ldap' => [$this, 'factory_ldap'],
                 'service/auth' => [$this, 'factory_service_auth'],
                 'form/loginform' => [$this, 'factory_form_login'],
+                'form/migration' => [$this, 'factory_form_migration'],
                 'mapper/wpuser' => [$this, 'factory_mapper_wpuser'],
                 'mapper/wpusermeta' => [$this, 'factory_mapper_wpusermeta'],
             ]
@@ -48,6 +56,35 @@ class Module
     public function getConfig()
     {
         return include __DIR__ . '/config/module.config.php';
+    }
+
+    public function onBootstrap(MvcEvent $e)
+    {
+        $eventManager = $e->getApplication()->getEventManager();
+        $moduleRouteListener = new ModuleRouteListener();
+        $moduleRouteListener->attach($eventManager);
+
+        $sharedEvents = $eventManager->getSharedManager();
+        $sharedEvents->attach(AbstractActionController::class, 'dispatch', [$this, 'require_login'], 1000);
+    }
+
+    public function require_login(MvcEvent $e)
+    {
+        $controller = $e->getTarget();
+        $request = $controller->getRequest();
+        /** @var AuthenticationService $authService */
+        $authService = $e->getApplication()->getServiceManager()->get('service/auth');
+
+        // Skip ACL checks for Console based requests
+        if (!$request instanceof ConsoleRequest) {
+            $matchedRoute = $controller->getEvent()->getRouteMatch()->getMatchedRouteName();
+            $allowedRoutes = array('login', 'login/migrate', 'logout', 'register');
+            if (in_array($matchedRoute, $allowedRoutes) || $authService->hasIdentity()) {
+                return; // they're logged in or on the login page, allow
+            }
+            // otherwise, redirect to the login page
+            return $controller->redirect()->toRoute('login');
+        }
     }
 
     /**
@@ -68,6 +105,11 @@ class Module
     public function factory_form_login(ServiceManager $sm)
     {
         return new LoginForm();
+    }
+
+    public function factory_form_migration(ServiceManager $sm)
+    {
+        return new Form\LdapMigrate();
     }
 
     /**

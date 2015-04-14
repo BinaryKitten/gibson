@@ -11,6 +11,8 @@ return [
 //        'form' => 'layout/application'
 //        'user/default' => 'layout/frank',
         'login' => 'layout/auth',
+        'login/migrate' => 'layout/auth',
+        'logout' => 'layout/auth',
         'register' => 'layout/auth',
     ]
 ];

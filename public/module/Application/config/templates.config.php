@@ -13,6 +13,8 @@ return  [
 
     'application/index/index' => $viewDir . '/index/index.phtml',
     'application/auth/login'   => $viewDir . '/auth/login.phtml',
+    'application/auth/logout'   => $viewDir . '/auth/logout.phtml',
+    'application/auth/migrate' => $viewDir . '/auth/migrate.phtml',
     'application/registration/index' => $viewDir . '/registration/index.phtml',
     'application/registration/disabled' => $viewDir . '/registration/disabled.phtml',
 ];

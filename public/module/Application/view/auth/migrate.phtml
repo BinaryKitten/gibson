@@ -1,18 +1,19 @@
 <?php
 /** @var \Zend\Form\Form $form */
-$form = $this->loginForm;
+$form = $this->migrationForm;
 $form->prepare();
 ?>
-<div class="login">
-<?php \Zend\Debug\Debug::dump($this->identity()); ?>
+<div class="login migrate">
 
     <img src="/application/images/logo.png" alt="HacMan Logo" />
     <h1>Membership System</h1>
+    <p>Your login has been found as part of our old membership database and as such now requires a new password to be set.</p>
+    <p>Please enter a new password using the form below</p>
     <?php
     /** @var \Zend\Form\Element\Text $usernameElement */
-    $usernameElement = $form->get('username');
-    /** @var \Zend\Form\Element\Password $passwordElement */
     $passwordElement = $form->get('password');
+    /** @var \Zend\Form\Element\Password $passwordElement */
+    $passwordCheckElement = $form->get('passwordCheck');
 
     /** @var \Zend\Form\View\Helper\FormElementErrors $elementErrors */
     $elementErrors =$this->formElementErrors();
@@ -41,18 +42,18 @@ $form->prepare();
 
     <form method="post">
         <div class="form-group">
-            <label for="login__username" class="hide">Username</label>
-            <?=$this->formText($usernameElement->setAttributes([
-                'id' => 'login__username',
-                'placeholder' => 'Username',
+            <label for="login_password" class="hide">Email</label>
+            <?=$this->formPassword($passwordElement->setAttributes([
+                'id' => 'login__password',
+                'placeholder' => 'Password',
                 'class' => 'form-control'
             ])); ?>
         </div>
         <div class="form-group">
-            <label for="login__password" class="hide">Password</label>
-            <?=$this->formPassword($passwordElement->setAttributes([
-                'id' => 'login__password',
-                'placeholder' => 'Password',
+            <label for="login__passwordCheck" class="hide">Password</label>
+            <?=$this->formPassword($passwordCheckElement->setAttributes([
+                'id' => 'login__passwordCheck',
+                'placeholder' => 'Password Again',
                 'class' => 'form-control'
             ])); ?>
         </div>
