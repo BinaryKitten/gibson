@@ -1,9 +1,9 @@
 <?php
 
-namespace Impact\Migration;
+namespace Gibson\Migration;
 
-use ZfSimpleMigrations\Library\AbstractMigration;
 use Zend\Db\Metadata\MetadataInterface;
+use ZfSimpleMigrations\Library\AbstractMigration;
 
 class Version20150418152434 extends AbstractMigration
 {

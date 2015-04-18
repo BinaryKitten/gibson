@@ -10,7 +10,7 @@ namespace Application\Mapper;
 
 use ZfcBase\Mapper\AbstractDbMapper;
 
-class WPUser extends  AbstractDbMapper
+class WPUserMapper extends AbstractDbMapper
 {
     /**
      * @var string

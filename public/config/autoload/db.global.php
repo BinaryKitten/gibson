@@ -33,6 +33,6 @@ return [
     ],
     'migrations' => [
         'dir' => __DIR__ . '/../../migrations',
-        'namespace' => 'Impact\Migration'
+        'namespace' => 'Gibson\Migration'
     ]
 ];

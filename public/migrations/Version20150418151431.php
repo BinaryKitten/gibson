@@ -1,9 +1,9 @@
 <?php
 
-namespace Impact\Migration;
+namespace Gibson\Migration;
 
-use ZfSimpleMigrations\Library\AbstractMigration;
 use Zend\Db\Metadata\MetadataInterface;
+use ZfSimpleMigrations\Library\AbstractMigration;
 
 class Version20150418151431 extends AbstractMigration
 {
@@ -18,9 +18,7 @@ emergency_details  text NULL ,
 emergency_details_expiry  date NULL ,
 medical_information  text NULL ,
 medical_information_expiry  date NULL ,
-PRIMARY KEY (samAccountName)
-)
-;');
+PRIMARY KEY (samAccountName));');
     }
 
     public function down(MetadataInterface $schema)
