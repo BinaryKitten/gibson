@@ -5,6 +5,7 @@ return array(
         'Arazu',
         'ZF2AuthWordpress',
         'Application',
+        'ZfSimpleMigrations',
     ),
 
     // These are various options for the listeners attached to the ModuleManager
