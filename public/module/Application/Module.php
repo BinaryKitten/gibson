@@ -10,6 +10,7 @@
 namespace Application;
 
 use Application\Form\Login as LoginForm;
+use Application\Mapper\LdapMapper;
 use Application\Mapper\WPUser as WPUserMapper;
 use Application\Mapper\WPUserMeta as WPUserMetaMapper;
 use Application\Model\WPUser as WPUserModel;
@@ -37,15 +38,18 @@ class Module
         return [
             'aliases' => [
                 'Zend\Authentication\AuthenticationService' => 'service/auth',
+                'mapper/wpuser' => 'Application\Mapper\WPUserMapper',
+                'mapper/wpusermeta' => 'Application\Mapper\WPUserMetaMapper'
             ],
             'factories' => [
                 'ldap_auth_adapter' => [$this, 'factory_auth_adapter_ldap'],
                 'ldap' => [$this, 'factory_ldap'],
+                'Application/Mapper/LdapMapper' => [$this, 'factory_ldap_mapper'],
                 'service/auth' => [$this, 'factory_service_auth'],
                 'form/loginform' => [$this, 'factory_form_login'],
                 'form/migration' => [$this, 'factory_form_migration'],
-                'mapper/wpuser' => [$this, 'factory_mapper_wpuser'],
-                'mapper/wpusermeta' => [$this, 'factory_mapper_wpusermeta'],
+//                'mapper/wpuser' => [$this, 'factory_mapper_wpuser'],
+//                'mapper/wpusermeta' => [$this, 'factory_mapper_wpusermeta'],
             ]
         ];
     }
@@ -58,6 +62,9 @@ class Module
         return include __DIR__ . '/config/module.config.php';
     }
 
+    /**
+     * @param MvcEvent $e
+     */
     public function onBootstrap(MvcEvent $e)
     {
         $eventManager = $e->getApplication()->getEventManager();
@@ -68,6 +75,9 @@ class Module
         $sharedEvents->attach(AbstractActionController::class, 'dispatch', [$this, 'require_login'], 1000);
     }
 
+    /**
+     * @param MvcEvent $e
+     */
     public function require_login(MvcEvent $e)
     {
         $controller = $e->getTarget();
@@ -107,6 +117,10 @@ class Module
         return new LoginForm();
     }
 
+    /**
+     * @param ServiceManager $sm
+     * @return Form\LdapMigrate
+     */
     public function factory_form_migration(ServiceManager $sm)
     {
         return new Form\LdapMigrate();
@@ -164,6 +178,17 @@ class Module
         $class->setDbAdapter($sm->get('Zend\Db\Adapter\Adapter'));
         $class->setEntityPrototype(new WPUserMetaModel());
         $class->setHydrator(new ObjectPropertyHydrator());
+        return $class;
+    }
+
+    /**
+     * @param ServiceManager $sm
+     * @return LdapMapper
+     */
+    public function factory_ldap_mapper(ServiceManager $sm)
+    {
+        $class = new LdapMapper();
+        $class->setLdap($sm->get('ldap'));
         return $class;
     }
 
