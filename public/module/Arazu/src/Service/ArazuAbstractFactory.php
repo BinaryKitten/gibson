@@ -126,7 +126,7 @@ class ArazuAbstractFactory implements AbstractFactoryInterface
             return false;
         }
 
-        $entity = $ns . '\\Model\\' . $what;
+        $entity = $ns . '\\Model\\' . str_replace($type,'',$what);
 
         if (!class_exists($entity, true)) {
             return false;
@@ -147,7 +147,7 @@ class ArazuAbstractFactory implements AbstractFactoryInterface
     {
         $parts = explode('\\', $requestedName);
         list($ns, $type, $what) = $parts;
-        $entityClass = $ns . '\\Model\\' . $what;
+        $entityClass = $ns . '\\Model\\' . str_replace($type, '', $what);
 
         switch($type) {
             case 'Controller':
@@ -169,10 +169,11 @@ class ArazuAbstractFactory implements AbstractFactoryInterface
 
             case 'Mapper':
                 $mapperClass = $ns . "\\Mapper\\" . ucfirst($what) . 'Mapper';
+                $mapperClass = str_replace('MapperMapper', 'Mapper', $mapperClass);
                 $mapper = new $mapperClass;
                 $mapper->setDbAdapter($serviceLocator->get('Zend\Db\Adapter\Adapter'));
                 $mapper->setHydrator(new ObjectProperty());
-                $mapper->setEntityPrototype(new $entityClass);
+                $mapper->setEntityPrototype($serviceLocator->get($entityClass));
                 return $mapper;
                 break;
 
@@ -187,7 +188,7 @@ class ArazuAbstractFactory implements AbstractFactoryInterface
                 }
 
                 $builder = new AnnotationBuilder();
-                $entityObj = new $entityClass;
+                $entityObj = new $serviceLocator->get($entityClass);
 
                 $form = $builder->createForm($entityObj);
                 $form->bind($entityObj);
