@@ -5,7 +5,8 @@ return array(
         'ZfcBase',
         'Arazu',
         'ZF2AuthWordpress',
-        'Application',
+        'Web',
+        'Api',
         'ZfSimpleMigrations',
     ),
 
