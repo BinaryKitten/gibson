@@ -66,9 +66,6 @@ class AuthController extends AbstractActionController
                 }
             }
 
-            /** @var WPUserMapper $wpUserMapper */
-            $wpUserMapper = $this->getServiceLocator()->get('Web\Mapper\WPUserMapper');
-
             return array(
                 'loginForm' => $form,
             );
@@ -107,7 +104,7 @@ class AuthController extends AbstractActionController
 //                    return $this->redirect()->refresh();
 
                     /** @var \Web\Mapper\WPUserMetaMapper $wpMeta */
-                    $wpMeta = $this->getServiceLocator()->get('mapper/wpusermeta');
+                    $wpMeta = $this->getServiceLocator()->get('Application\Mapper\WPUserMetaMapper');
 //            $groups = unserialize($wpMeta->getMetaForUser($wpUser, 'wp_capabilities')->meta_value);
                     $rfid = $wpMeta->getMetaForUser($wpUser, 'rfid_code')->meta_value;
                     $newPassword = $form->get('password')->getValue();
@@ -116,7 +113,7 @@ class AuthController extends AbstractActionController
 ////                            $ldap = $ldapAdapter->getLdap();
 
                     /** @var UserRFIDMapper $rfidDataMapper */
-                    $rfidDataMapper = $this->getServiceLocator()->get('Web\Mapper\UserRFID');
+                    $rfidDataMapper = $this->getServiceLocator()->get('Application\Mapper\UserRFID');
                     try {
                         $result = $rfidDataMapper->addRFIDtoUser($wpUser, $rfid, 'Primary RFID');
                     } catch(RFIDException $rfidException) {
@@ -124,7 +121,7 @@ class AuthController extends AbstractActionController
                     }
 
                     /** @var UserDataMapper $userDataMapper */
-                    $userDataMapper = $this->getServiceLocator()->get('Web\Mapper\UserData');
+                    $userDataMapper = $this->getServiceLocator()->get('Application\Mapper\UserData');
                     try {
                         $userDataMapper->createUserFromWordpress($wpUser);
                     } catch(\Exception $e) {
