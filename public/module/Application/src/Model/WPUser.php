@@ -6,10 +6,10 @@
  * Time: 16:57
  */
 
-namespace Web\Model;
+namespace Application\Model;
 
 
-use Web\Mapper\WPUserMetaMapper;
+use Application\Mapper\WPUserMetaMapper;
 use Zend\Db\ResultSet\HydratingResultSet;
 use Zend\ServiceManager\ServiceLocatorAwareInterface;
 use Zend\ServiceManager\ServiceLocatorInterface;

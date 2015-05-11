@@ -2,10 +2,10 @@
 
 namespace Web\Controller;
 
-use Web\Exception\RFIDException;
-use Web\Mapper\UserDataMapper;
-use Web\Mapper\UserRFIDMapper;
-use Web\Mapper\WPUserMapper;
+use Application\Exception\RFIDException;
+use Application\Mapper\UserDataMapper;
+use Application\Mapper\UserRFIDMapper;
+use Application\Mapper\WPUserMapper;
 use Zend\Authentication\AuthenticationService;
 use Zend\Http\PhpEnvironment\Response;
 use Zend\Mvc\Controller\AbstractActionController;

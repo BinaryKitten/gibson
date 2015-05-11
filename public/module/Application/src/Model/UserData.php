@@ -1,6 +1,6 @@
 <?php
 
-namespace Web\Model;
+namespace Application\Model;
 
 
 class UserData

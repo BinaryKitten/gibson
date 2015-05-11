@@ -3,59 +3,64 @@
 $form = $this->loginForm;
 $form->prepare();
 ?>
-<div class="login">
-<?php \Zend\Debug\Debug::dump($this->identity()); ?>
+<div class="row">
+    <div class="col-md-12 main">
+        <div class="login">
+            <?php //\Zend\Debug\Debug::dump($this->identity()); ?>
 
-    <img src="/application/images/logo.png" alt="HacMan Logo" />
-    <h1>Membership System</h1>
-    <?php
-    /** @var \Zend\Form\Element\Text $usernameElement */
-    $usernameElement = $form->get('username');
-    /** @var \Zend\Form\Element\Password $passwordElement */
-    $passwordElement = $form->get('password');
+            <img src="/application/images/logo.png" alt="HacMan Logo"/>
 
-    /** @var \Zend\Form\View\Helper\FormElementErrors $elementErrors */
-    $elementErrors =$this->formElementErrors();
-    $message = $elementErrors
-        ->setMessageOpenFormat('<li class="elementError">')
-        ->setMessageCloseString('</li>')
-        ->setMessageSeparatorString('</li><li class="elementError">')
-        ->render($form);
-
-    if ($this->flashMessenger()->hasMessages() || !empty($message)) {
-        ?>
-        <ul class="alert alert-danger">
+            <h1>Membership System</h1>
             <?php
-            if (!empty($message)):
-                echo $message;
-            endif;
+            /** @var \Zend\Form\Element\Text $usernameElement */
+            $usernameElement = $form->get('username');
+            /** @var \Zend\Form\Element\Password $passwordElement */
+            $passwordElement = $form->get('password');
 
-            foreach ($this->flashMessenger()->getMessages() as $message) : ?>
-                <li class="loginError"><?= $message; ?></li>
-            <?php endforeach; ?>
-        </ul>
-        <?php
-        $this->flashMessenger()->clearMessages();
-    }
-    ?>
+            /** @var \Zend\Form\View\Helper\FormElementErrors $elementErrors */
+            $elementErrors = $this->formElementErrors();
+            $message = $elementErrors
+                ->setMessageOpenFormat('<li class="elementError">')
+                ->setMessageCloseString('</li>')
+                ->setMessageSeparatorString('</li><li class="elementError">')
+                ->render($form);
 
-    <form method="post">
-        <div class="form-group">
-            <label for="login__username" class="hide">Username</label>
-            <?=$this->formText($usernameElement->setAttributes([
-                'id' => 'login__username',
-                'placeholder' => 'Username',
-                'class' => 'form-control'
-            ])); ?>
+            if ($this->flashMessenger()->hasMessages() || !empty($message)) {
+                ?>
+                <ul class="alert alert-danger">
+                    <?php
+                    if (!empty($message)):
+                        echo $message;
+                    endif;
+
+                    foreach ($this->flashMessenger()->getMessages() as $message) : ?>
+                        <li class="loginError"><?= $message; ?></li>
+                    <?php endforeach; ?>
+                </ul>
+                <?php
+                $this->flashMessenger()->clearMessages();
+            }
+            ?>
+
+            <form method="post">
+                <div class="form-group">
+                    <label for="login__username" class="hide">Username</label>
+                    <?= $this->formText($usernameElement->setAttributes([
+                        'id' => 'login__username',
+                        'placeholder' => 'Username',
+                        'class' => 'form-control'
+                    ])); ?>
+                </div>
+                <div class="form-group">
+                    <label for="login__password" class="hide">Password</label>
+                    <?= $this->formPassword($passwordElement->setAttributes([
+                        'id' => 'login__password',
+                        'placeholder' => 'Password',
+                        'class' => 'form-control'
+                    ])); ?>
+                </div>
+                <button type="submit" class="btn btn-primary" name="submit">Log in</button>
+            </form>
         </div>
-        <div class="form-group">
-            <label for="login__password" class="hide">Password</label>
-            <?=$this->formPassword($passwordElement->setAttributes([
-                'id' => 'login__password',
-                'placeholder' => 'Password',
-                'class' => 'form-control'
-            ])); ?>
-        </div>
-        <button type="submit" class="btn btn-primary" name="submit">Log in</button>
-    </form>
+    </div>
 </div>

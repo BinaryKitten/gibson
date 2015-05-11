@@ -1,2 +1,2 @@
 #!/bin/bash
-ldapsearch -h 127.0.0.1 -D "administrator@hackspace.internal" -b "dc=hackspace,dc=internal" -w Password4LDAP $@
+ldapdelete -h 127.0.0.1 -D "administrator@hackspace.internal" -w Password4LDAP -b "dc=hackspace,dc=internal" $@

@@ -10,18 +10,17 @@
 namespace Web;
 
 use Web\Form\Login as LoginForm;
+use Web\Form\Registration as RegistrationForm;
+use Web\InputFilter\Registration as RegistrationInputFilter;
 use Web\Mapper\LdapMapper;
 use Web\Mapper\WPUser as WPUserMapper;
 use Web\Mapper\WPUserMeta as WPUserMetaMapper;
-use Web\Model\WPUser as WPUserModel;
-use Web\Model\WPUserMeta as WPUserMetaModel;
-use Zend\Authentication\Adapter\Ldap as LdapAuthAdapter;
+use Application\Model\WPUser as WPUserModel;
+use Application\Model\WPUserMeta as WPUserMetaModel;
 use Zend\Authentication\AuthenticationService;
 use Zend\Authentication\Storage\Session as AuthenticationSessionStorage;
 use Zend\Console\Request as ConsoleRequest;
-use Zend\Debug\Debug;
-use Zend\Ldap\Exception\LdapException;
-use Zend\Ldap\Ldap;
+use Zend\Mvc\Application;
 use Zend\Mvc\Controller\AbstractActionController;
 use Zend\Mvc\ModuleRouteListener;
 use Zend\Mvc\MvcEvent;
@@ -38,18 +37,12 @@ class Module
         return [
             'aliases' => [
                 'Zend\Authentication\AuthenticationService' => 'service/auth',
-                'mapper/wpuser' => 'Web\Mapper\WPUserMapper',
-                'mapper/wpusermeta' => 'Web\Mapper\WPUserMetaMapper'
             ],
             'factories' => [
-                'ldap_auth_adapter' => [$this, 'factory_auth_adapter_ldap'],
-                'ldap' => [$this, 'factory_ldap'],
-                'Application/Mapper/LdapMapper' => [$this, 'factory_ldap_mapper'],
                 'service/auth' => [$this, 'factory_service_auth'],
                 'form/loginform' => [$this, 'factory_form_login'],
                 'form/migration' => [$this, 'factory_form_migration'],
-//                'mapper/wpuser' => [$this, 'factory_mapper_wpuser'],
-//                'mapper/wpusermeta' => [$this, 'factory_mapper_wpusermeta'],
+                'form/registration' => [$this, 'factory_form_registration'],
             ]
         ];
     }
@@ -73,6 +66,39 @@ class Module
 
         $sharedEvents = $eventManager->getSharedManager();
         $sharedEvents->attach(AbstractActionController::class, 'dispatch', [$this, 'require_login'], 1000);
+        $sharedEvents->attach(Application::class, 'render', [$this, 'setViewScripts'], 5);
+    }
+
+    public function setViewScripts(MvcEvent $e)
+    {
+        $serviceManager = $e->getApplication()->getServiceManager();
+        $renderer = $serviceManager->get('Zend\View\Renderer\RendererInterface');
+        /** @var \Zend\View\Helper\HeadScript $headScript */
+        $headScript = $renderer->headScript();
+
+        /** @var \Zend\View\Helper\Placeholder\Container\AbstractContainer $placeHolder */
+        $placeHolder = $renderer->placeHolder('footerScripts');
+
+        /** @var \Zend\View\Helper\HeadLink $headLink */
+        $headLink = $renderer->headLink();
+
+        $headLink(['rel' => 'shortcut icon', 'type' => 'image/vnd.microsoft.icon', 'href' => $renderer->basePath() . '/favicon.ico'])
+            ->prependStylesheet($renderer->basePath('application/css/style.css'))
+            ->prependStylesheet($renderer->basePath('css/bootstrap-theme.min.css'))
+            ->prependStylesheet($renderer->basePath('css/bootstrap.min.css'));
+
+        $headScript
+            ->appendFile("https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js")
+            ->appendFile("https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js");
+
+        $placeHolder->set($headScript->__toString());
+
+        $headScript->exchangeArray([]);
+
+        $headScript->appendFile('https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js', 'text/javascript', ['conditional' => 'lt IE 9']);
+        $headScript->appendFile('https://oss.maxcdn.com/respond/1.4.2/respond.min.js', 'text/javascript', ['conditional' => 'lt IE 9']);
+
+        $renderer->headTitle('HacMan - Membership System');
     }
 
     /**
@@ -95,17 +121,6 @@ class Module
             // otherwise, redirect to the login page
             return $controller->redirect()->toRoute('login');
         }
-    }
-
-    /**
-     * @param ServiceManager $sm
-     * @return LdapAuthAdapter
-     */
-    public function factory_auth_adapter_ldap(ServiceManager $sm)
-    {
-        $config = $sm->get('Config');
-        $ldapConfig = $config['ldap'];
-        return new LdapAuthAdapter(['server' => $ldapConfig]);
     }
 
     /**
@@ -137,26 +152,6 @@ class Module
 
     /**
      * @param ServiceManager $sm
-     * @return Ldap
-     */
-    public function factory_ldap(ServiceManager $sm)
-    {
-        $config = $sm->get('Config');
-        $ldapConfig = $config['ldap'];
-        try {
-            $ldap = new Ldap($ldapConfig);
-            $ldap->bind($ldapConfig['username'], $ldapConfig['password']);
-        } catch (LdapException $e) {
-            Debug::dump($e->getMessage());
-            die();
-        }
-
-        return $ldap;
-    }
-
-
-    /**
-     * @param ServiceManager $sm
      * @return WPUser
      */
     public function factory_mapper_wpuser(ServiceManager $sm)
@@ -183,13 +178,13 @@ class Module
 
     /**
      * @param ServiceManager $sm
-     * @return LdapMapper
+     * @return RegistrationForm
      */
-    public function factory_ldap_mapper(ServiceManager $sm)
+    public function factory_form_registration(ServiceManager $sm)
     {
-        $class = new LdapMapper();
-        $class->setLdap($sm->get('ldap'));
-        return $class;
+        $form = new RegistrationForm();
+        $form->setInputFilter(new RegistrationInputFilter() );
+        return $form;
     }
 
     /**
@@ -200,9 +195,10 @@ class Module
         return [
             'Zend\Loader\StandardAutoloader' => [
                 'namespaces' => [
-                    __NAMESPACE__ => __DIR__ . '/src/' . __NAMESPACE__,
+                    __NAMESPACE__ => __DIR__ . '/src',
                 ],
             ],
         ];
     }
+
 }

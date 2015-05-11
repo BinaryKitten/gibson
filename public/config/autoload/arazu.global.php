@@ -1,7 +1,7 @@
 <?php
 
 $arazuConfig = [
-    'base-namespace' => 'Web'
+    'base-namespace' => 'Application'
 ];
 
 return ['arazu' => $arazuConfig];

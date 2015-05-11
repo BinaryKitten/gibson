@@ -1,14 +1,8 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: Kat
- * Date: 28/03/2015
- * Time: 16:40
- */
 
-namespace Web\Mapper;
+namespace Application\Mapper;
 
-use Web\Model\WPUser;
+use Application\Model\WPUser;
 use Zend\Db\ResultSet\HydratingResultSet;
 use ZfcBase\Mapper\AbstractDbMapper;
 

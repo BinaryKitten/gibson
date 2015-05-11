@@ -1,8 +1,8 @@
 <?php
 
-namespace Web\Mapper;
+namespace Application\Mapper;
 
-use Web\Model\WPUser;
+use Application\Model\WPUser;
 use Zend\Db\Adapter\Driver\ResultInterface as DbResult;
 use Zend\ServiceManager\ServiceLocatorInterface;
 use ZfcBase\Mapper\AbstractDbMapper;

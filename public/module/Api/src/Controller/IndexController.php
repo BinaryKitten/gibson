@@ -8,7 +8,12 @@
 
 namespace Api\Controller;
 
+use Zend\Mvc\Controller\AbstractRestfulController;
 
-class IndexController {
+class IndexController extends AbstractRestfulController
+{
 
+    public function indexAction() {
+
+    }
 }

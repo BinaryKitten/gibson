@@ -1,10 +1,10 @@
 <?php
 
-namespace Web\Mapper;
+namespace Application\Mapper;
 
-use Web\Exception\RFIDException;
-use Web\Model\UserData as UserDataModel;
-use Web\Model\WPUser as WPUserModel;
+use Application\Exception\RFIDException;
+use Application\Model\UserData as UserDataModel;
+use Application\Model\WPUser as WPUserModel;
 use Zend\Db\Adapter\Exception\InvalidQueryException;
 use ZfcBase\Mapper\AbstractDbMapper;
 
