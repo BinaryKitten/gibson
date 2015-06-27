@@ -9,11 +9,12 @@
     "homepage": "http://framework.zend.com/",
     "require": {
         "php": ">=5.3.3",
-        "zendframework/zendframework": "2.4.*",
+        "zendframework/zendframework": "2.5.*",
         "doctrine/annotations": "~1.2",
         "zf-commons/zfc-base": "~0.1",
         "binarykitten/zf2authwordpress": "~0.1",
-        "vgarvardt/zf-simple-migrations": "0.1.*"
+        "vgarvardt/zf-simple-migrations": "0.1.*",
+        "zendframework/zend-ldap": "^2.5"
     },
   "require-dev": {
       "clue/graph-composer": "*",
