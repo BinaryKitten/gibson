@@ -1,0 +1,33 @@
+<?php
+$html = '';
+/** @var \Zend\Form\Element $element */
+$element = $this->element;
+$id = $element->getAttribute('name');
+$element->setAttribute('id', $id);
+$element->setAttribute('class', 'form-control input-sm');
+$element->setLabelAttributes(['class' => 'input-group-addon']);
+$m = $element->getMessages();
+$hasErrors = !empty($m);
+$html .= '<div class="input-group';
+if ($element->getAttribute('type') != 'textarea') {
+    $html .= ' input-group-sm';
+}
+if ($hasErrors) {
+    $html .= ' has-error';
+    $element->setAttributes([
+        'data-toggle' => "tooltip",
+        'data-placement' => "top",
+        'title' => array_shift($m)
+    ]);
+}
+$html .= '">';
+$html .= $this->formLabel($element);
+$html .= $this->formElement($element);
+
+if ($hasErrors) {
+    $html .= '<span class="glyphicon glyphicon-remove form-control-feedback" aria-hidden="true"></span>
+  <span id="inputError2Status" class="sr-only">(error)</span>';
+}
+$html .= '</div><br />';
+
+echo $html;

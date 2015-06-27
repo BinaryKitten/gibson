@@ -17,4 +17,6 @@ return [
     'web/auth/migrate' => $viewDir . '/auth/migrate.phtml',
     'web/registration/index' => $viewDir . '/registration/index.phtml',
     'web/registration/disabled' => $viewDir . '/registration/disabled.phtml',
+
+    'partials/formElement' => $viewDir . '/partials/formElement.phtml',
 ];

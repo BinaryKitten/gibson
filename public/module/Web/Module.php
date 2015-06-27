@@ -9,6 +9,7 @@
 
 namespace Web;
 
+use SebastianBergmann\Environment\Console;
 use Web\Form\Login as LoginForm;
 use Web\Form\Registration as RegistrationForm;
 use Web\InputFilter\Registration as RegistrationInputFilter;
@@ -26,6 +27,9 @@ use Zend\Mvc\ModuleRouteListener;
 use Zend\Mvc\MvcEvent;
 use Zend\ServiceManager\ServiceManager;
 use Zend\Stdlib\Hydrator\ObjectProperty as ObjectPropertyHydrator;
+use Zend\View\Helper\HeadLink as HeadLinkViewHelper;
+use Zend\View\Helper\HeadScript as HeadScriptViewHelper;
+use Zend\View\Helper\Placeholder\Container\AbstractContainer as AbstractPlaceholderContainer;
 
 class Module
 {
@@ -69,36 +73,52 @@ class Module
         $sharedEvents->attach(Application::class, 'render', [$this, 'setViewScripts'], 5);
     }
 
+    /**
+     * @param MvcEvent $e
+     */
     public function setViewScripts(MvcEvent $e)
     {
+        $controller = $e->getTarget();
+        $request = $controller->getRequest();
+        if ($request instanceof ConsoleRequest) {
+            return;
+        }
+
         $serviceManager = $e->getApplication()->getServiceManager();
-        $renderer = $serviceManager->get('Zend\View\Renderer\RendererInterface');
-        /** @var \Zend\View\Helper\HeadScript $headScript */
-        $headScript = $renderer->headScript();
+        $viewRenderer = $serviceManager->get('Zend\View\Renderer\RendererInterface');
 
-        /** @var \Zend\View\Helper\Placeholder\Container\AbstractContainer $placeHolder */
-        $placeHolder = $renderer->placeHolder('footerScripts');
+        /** @var HeadScriptViewHelper $headScriptViewHelper */
+        $headScriptViewHelper = $viewRenderer->headScript();
 
-        /** @var \Zend\View\Helper\HeadLink $headLink */
-        $headLink = $renderer->headLink();
+        /** @var AbstractPlaceholderContainer $placeHolderViewHelper */
+        $placeHolderViewHelper = $viewRenderer->placeHolder('footerScripts');
 
-        $headLink(['rel' => 'shortcut icon', 'type' => 'image/vnd.microsoft.icon', 'href' => $renderer->basePath() . '/favicon.ico'])
-            ->prependStylesheet($renderer->basePath('application/css/style.css'))
-            ->prependStylesheet($renderer->basePath('css/bootstrap-theme.min.css'))
-            ->prependStylesheet($renderer->basePath('css/bootstrap.min.css'));
+        /** @var HeadLinkViewHelper $headLinkViewHelper */
+        $headLinkViewHelper = $viewRenderer->headLink();
 
-        $headScript
-            ->appendFile("https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js")
-            ->appendFile("https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js");
+        $headLinkViewHelper([
+            'rel' => 'shortcut icon', 'type' => 'image/vnd.microsoft.icon',
+            'href' => $viewRenderer->basePath() . '/favicon.ico'
+        ])
+//            ->prependStylesheet($renderer->basePath('application/css/style.css'))
+            ->prependStylesheet($viewRenderer->basePath('css/bootstrap-theme.min.css'))
+            ->prependStylesheet($viewRenderer->basePath('css/bootstrap.min.css'))
+        ;
 
-        $placeHolder->set($headScript->__toString());
+        $headScriptViewHelper
+            ->appendFile("/js/jquery.min.js")
+            ->appendFile("/js/bootstrap.min.js")
+            ->appendFile("/application/js/script.js")
+        ;
 
-        $headScript->exchangeArray([]);
+        $placeHolderViewHelper->set($headScriptViewHelper->__toString());
 
-        $headScript->appendFile('https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js', 'text/javascript', ['conditional' => 'lt IE 9']);
-        $headScript->appendFile('https://oss.maxcdn.com/respond/1.4.2/respond.min.js', 'text/javascript', ['conditional' => 'lt IE 9']);
+        $headScriptViewHelper->exchangeArray([]);
 
-        $renderer->headTitle('HacMan - Membership System');
+        $headScriptViewHelper->appendFile('https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js', 'text/javascript', ['conditional' => 'lt IE 9']);
+        $headScriptViewHelper->appendFile('https://oss.maxcdn.com/respond/1.4.2/respond.min.js', 'text/javascript', ['conditional' => 'lt IE 9']);
+
+        $viewRenderer->headTitle('HacMan - Membership System');
     }
 
     /**
@@ -183,7 +203,8 @@ class Module
     public function factory_form_registration(ServiceManager $sm)
     {
         $form = new RegistrationForm();
-        $form->setInputFilter(new RegistrationInputFilter() );
+        $registrationFilter = new RegistrationInputFilter($sm->get('Zend\Db\Adapter\Adapter'));
+        $form->setInputFilter($registrationFilter);
         return $form;
     }
 

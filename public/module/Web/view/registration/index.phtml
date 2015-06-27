@@ -1,21 +1,26 @@
+<?php
+/** @var \Zend\Form\Form $registrationForm */
+$registrationForm = $this->form;
+$registrationForm->prepare();
+echo $this->form()->openTag($registrationForm);
+
+?>
 <div class="row">
-    <div class="col-md-12 main">
+    <div class="col-md-10 main">
         <div class="login">
             <?php //\Zend\Debug\Debug::dump($this->identity()); ?>
-
-            <img src="/application/images/logo.png" alt="HacMan Logo"/>
-
-            <h1>Membership System</h1>
+            <h1>
+                <img src="/application/images/logo.png" alt="HacMan Logo" width="125" height="125"/> Membership System
+                <?php
+                $button = $this->form->get('submit');
+                $button->setAttribute('class', 'btn btn-primary btn-lg btn-login');
+                echo $this->formSubmit($button); ?>
+            </h1>
         </div>
     </div>
 </div>
 <div class="row">
-    <?php
-    $registrationForm = $this->form;
-    $registrationForm->prepare();
-    echo $this->form()->openTag($registrationForm); ?>
-
-    <div class="col-md-4 column">
+    <div class="col-md-12 column">
         <div class="panel panel-default">
             <div class="panel-heading">
                 <h3 class="panel-title">
@@ -26,26 +31,23 @@
                 <p>These are the details for logging into this site</p>
                 <?php
                 $details = [
-                    'username',
+                    'samAccountName',
                     'email',
                     'password',
                     'passwordCheck',
                 ];
 
-                foreach($details as $id):
-                    $element = $registrationForm->get($id);
-                    $element->setAttribute('id', $id);
-                    $element->setAttribute('class', 'form-control');
-                    $element->setLabelAttributes(['class' => 'input-group-addon']);
-                    ?>
+                foreach ($details as $id) {
+                    echo $this->formRow($form->get($id), null, false, 'partials/formElement');
+                }
 
-                    <div class="input-group input-group-sm"><?php echo $this->formRow($element); ?></div>
-                    <br/>
-                <?php endforeach; ?>
+                ?>
             </div>
         </div>
     </div>
-    <div class="col-md-6 column">
+</div>
+<div class="row">
+    <div class="col-md-12 column">
         <div class="panel panel-default">
             <div class="panel-heading">
                 <h3 class="panel-title">
@@ -57,56 +59,24 @@
                 <?php
                 $details = [
                     'phone',
-                    'address_line1',
-                    'address_line2',
-                    'address_town',
-                    'address_city',
-                    'address_county',
-                    'address_postcode',
+                    'nickname',
                 ];
 
-                foreach($details as $id):
-                    $element = $registrationForm->get($id);
-                    $element->setAttribute('id', $id);
-                    $element->setAttribute('class', 'form-control');
-                    $element->setLabelAttributes(['class' => 'input-group-addon']);
-                ?>
+                echo $this->formRow($form->get('phone'), null, false, 'partials/formElement'); ?>
 
-                <div class="input-group input-group-sm"><?php echo $this->formRow($element); ?></div>
-                <br/>
-                <?php endforeach; ?>
-            </div>
-        </div>
-    </div>
-    </div>
-<div class="row">
-    <div class="col-md-12 column">
-        <div class="panel panel-default">
-            <div class="panel-heading">
-                <h3 class="panel-title">
-                   Emergency Details
-                </h3>
-            </div>
-            <div class="panel-body">
-                <p>Who to contact and what we should be aware of</p>
-                <?php
-                $details = [
-                    'emergency_details',
-                    'medical_information',
-                ];
+                <p>Your Nickname - This will be used for display purposes</p>
+                <?php echo $this->formRow($form->get('nickname'), null, false, 'partials/formElement'); ?>
 
-                foreach($details as $id):
-                ?>
-
-                <div class="input-group"><?php echo $this->formRow($registrationForm->get($id)->setAttribute('id', $id)); ?></div>
-                <br/>
-                <?php endforeach; ?>
+                <p>Your Contact Address</p>
+                <?php $element = $registrationForm->get('address');
+                $element->setAttribute('rows', 5);
+                echo $this->formRow($element, null, false); ?>
             </div>
         </div>
     </div>
 </div>
 <div class="row">
-    <div class="col-md-12 column">
+    <div class="col-md-6 column">
         <div class="panel panel-default">
             <div class="panel-heading">
                 <h3 class="panel-title">
@@ -114,17 +84,33 @@
                 </h3>
             </div>
             <div class="panel-body">
-                <p>Who to contact and what we should be aware of</p>
+                <p>Please tell us who we should contact in case of emergency</p>
+
+                <?php
+                $element = $registrationForm->get('emergency_details');
+                $element->setAttribute('rows', 5);
+                echo $this->formRow($element, null, false); ?>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 column">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h3 class="panel-title">
+                    Medical Information
+                </h3>
+            </div>
+            <div class="panel-body">
+                <p>Please tell us about any allergies and medical conditions we need to be aware of</p>
+                <?php
+                $element = $registrationForm->get('medical_information');
+                $element->setAttribute('rows', 5);
+                echo $this->formRow($element); ?>
             </div>
         </div>
     </div>
 </div>
-<div class="row">
-    <div class="col-md-11 column">&nbsp;</div>
-    <div class="col-md-1">
-        <?php echo $this->formSubmit($this->form->get('submit')->setAttribute('value', 'Register')); ?>
-    </div>
-</div>
+
 <?php
 
 echo $this->form()->closeTag();

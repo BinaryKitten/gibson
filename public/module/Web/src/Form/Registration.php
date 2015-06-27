@@ -15,27 +15,25 @@ class Registration extends ZendForm
         parent::__construct('UserRegistration');
 
         $elements = [
-            'username' => 'Username',
-            'email' => new Element\Email('email', ['label' => 'Email Address']),
+            'samAccountName' => 'Username',
+            'email' => new Element\Text('email', ['label' => 'Email Address']),
             'password' => new PasswordElement('password', ['label' => 'Password']),
             'passwordCheck' => new PasswordElement('passwordCheck', ['label' => 'Password (again)']),
 
-            new Element\Textarea('emergency_details', ['label' => 'Emergency Contact Details']),
-            new Element\Textarea('medical_information', ['label' => 'Emergency Contact Details']),
-
             'phone' => 'Phone Number',
-            'address_line1' => 'Address Line 1',
-            'address_line2' => 'Address Line 2',
-            'address_town' => 'Town',
-            'address_city' => 'City',
-            'address_county' => 'County',
-            'address_postcode' => 'Post Code',
+            'nickname' => 'Nickname',
+            new Element\Textarea('address', ['label' => 'Address', 'attributes' => ['rows' => 3]]),
 
-            new SubmitElement('submit', ['label' => 'Register'])
+            new Element\Textarea('medical_information', ['label' => 'Medical Details (optional)', 'attributes' => ['rows' => 3]]),
+            new Element\Textarea('emergency_details', ['label' => 'Emergency Contact Details', 'attributes' => ['rows' => 3]]),
+
+            'submit' => new SubmitElement('submit')
         ];
 
+        $elements['submit']->setValue('Register');
+
         foreach($elements as $name => $elementOfLabel) {
-            if (!($elementOfLabel instanceof Element)) {
+            if (!($elementOfLabel instanceof Element) && !is_array($elementOfLabel)) {
                 $elementOfLabel = new TextElement($name, ['label' => $elementOfLabel]);
             }
             $this->add($elementOfLabel);

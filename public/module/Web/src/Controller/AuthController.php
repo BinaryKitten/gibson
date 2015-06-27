@@ -6,6 +6,7 @@ use Application\Exception\RFIDException;
 use Application\Mapper\UserDataMapper;
 use Application\Mapper\UserRFIDMapper;
 use Application\Mapper\WPUserMapper;
+use Application\Model\WPUser;
 use Zend\Authentication\AuthenticationService;
 use Zend\Http\PhpEnvironment\Response;
 use Zend\Mvc\Controller\AbstractActionController;
@@ -77,6 +78,7 @@ class AuthController extends AbstractActionController
         if (!$this->wpSession->offsetExists('wpUser')) {
             return $this->redirect()->toRoute('login');
         }
+        /** @var WPUser $wpUser */
         $wpUser = $this->wpSession->wpUser;
 
 //        return $this->getResponse()->setContent(var_export($wpUser, true));
@@ -115,7 +117,7 @@ class AuthController extends AbstractActionController
                     /** @var UserRFIDMapper $rfidDataMapper */
                     $rfidDataMapper = $this->getServiceLocator()->get('Application\Mapper\UserRFID');
                     try {
-                        $result = $rfidDataMapper->addRFIDtoUser($wpUser, $rfid, 'Primary RFID');
+                        $result = $rfidDataMapper->addRFIDtoUser($wpUser, $wpUser->rfid_code, 'Primary RFID');
                     } catch(RFIDException $rfidException) {
                         //ignore the exception - UI will handle no RFID for user later
                     }
@@ -123,10 +125,15 @@ class AuthController extends AbstractActionController
                     /** @var UserDataMapper $userDataMapper */
                     $userDataMapper = $this->getServiceLocator()->get('Application\Mapper\UserData');
                     try {
-                        $userDataMapper->createUserFromWordpress($wpUser);
+                        $userDataMapper->createUser($wpUser);
                     } catch(\Exception $e) {
                         \Zend\Debug\Debug::dump($e);
                     }
+
+                    /** @var \Application\Mapper\LdapMapper $ldapMapper */
+                    $ldapMapper = $this->getServiceLocator()->get('Application\Mapper\Ldap');
+
+                    $ldapMapper->createUser($wpUser, $form->getData()['password']);
 
                     die();
 

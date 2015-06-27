@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
     <?php echo $this->headTitle(); ?>
 
     <?php echo $this->headLink(); ?>
@@ -11,15 +11,10 @@
     <?php echo $this->headScript(); ?>
 </head>
 <body class="auth">
-
-<div class="container-fluid">
-
-        <?php echo $this->content; ?>
-
-</div>
-
-<!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
-<?php echo $this->placeHolder('footerScripts'); ?>
-
+    <div class="container-fluid">
+            <?php echo $this->content; ?>
+    </div>
+    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <?php echo $this->placeHolder('footerScripts'); ?>
 </body>
 </html>
