@@ -14,6 +14,22 @@ use Zend\Db\ResultSet\HydratingResultSet;
 use Zend\ServiceManager\ServiceLocatorAwareInterface;
 use Zend\ServiceManager\ServiceLocatorInterface;
 
+/**
+ * Class WPUser
+ * @package Application\Model
+ * @property-read string $emergency_contact_details
+ * @property-read string $emergency_contact_name
+ * @property-read string $address
+ * @property-read string $phone_number
+ * @property-read string $payment_method
+ * @property-read string $payment_reference
+ * @property-read string $nickname
+ * @property-read string $rfid_code
+ * @property-read string $membership_amount
+ * @property-read string $membership_expiry
+ * @property-read string $anything_else
+ * @property-read array $roles
+ */
 class WPUser implements ServiceLocatorAwareInterface
 {
     public $ID;

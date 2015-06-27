@@ -15,14 +15,15 @@ class UserRFIDMapper extends AbstractDbMapper
      */
     protected $tableName = 'gibson_user_rfid';
 
-    public function addRFIDtoUser($user, $rfid, $description = '')
+    public function addRFIDtoUser($user, $rfid, $description = '', $enabled = true)
     {
        $samAccountName = $this->getSamAccountNameFromUser($user);
 
         $data = [
             'rfidCode' => $rfid,
             'description' => $description,
-            'samAccountName' => $samAccountName
+            'samAccountName' => $samAccountName,
+            'enabled' => (int)$enabled,
         ];
         try {
             $result = $this->insert($data);

@@ -3,6 +3,8 @@
 namespace Application;
 
 
+use Application\Mapper\LdapMapper;
+use Zend\Ldap\Ldap as ZendLdap;
 use Zend\ServiceManager\ServiceManager;
 use Zend\Authentication\Adapter\Ldap as LdapAuthAdapter;
 
@@ -36,6 +38,9 @@ class Module
     public function getServiceConfig()
     {
         return [
+            'aliases' => [
+                'Application\Mapper\Ldap' => 'Application\Mapper\LdapMapper'
+            ],
             'factories' => [
                 'ldap_auth_adapter' => [$this, 'factory_auth_adapter_ldap'],
                 'ldap' => [$this, 'factory_ldap'],
@@ -53,7 +58,7 @@ class Module
         $config = $sm->get('Config');
         $ldapConfig = $config['ldap'];
         try {
-            $ldap = new Ldap($ldapConfig);
+            $ldap = new ZendLdap($ldapConfig);
             $ldap->bind($ldapConfig['username'], $ldapConfig['password']);
         } catch (LdapException $e) {
             Debug::dump($e->getMessage());

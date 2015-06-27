@@ -59,12 +59,12 @@ class LdapMapper implements ServiceLocatorAwareInterface
     }
 
     /**
-     * @param $username
+     * @param $samAccountName
      * @return string
      */
-    protected function getUserDn($username)
+    protected function getUserDn($samAccountName)
     {
-        return sprintf('CN=%s,CN=Users,DC=hackspace,DC=internal', strtolower($username));
+        return sprintf('CN=%s,CN=Users,DC=hackspace,DC=internal', strtolower($samAccountName));
     }
 
     /**
@@ -87,41 +87,41 @@ class LdapMapper implements ServiceLocatorAwareInterface
 
         if ($userData instanceof WPUser) {
             $userData = array(
-                'username' => $userData->user_login,
+                'samAccountName' => $userData->user_login,
                 'email' => $userData->user_email,
                 'nickname' => $userData->nickname
             );
         }
 
-        $userData['username'] = strtolower($userData['username']);
+        $userData['samAccountName'] = strtolower($userData['samAccountName']);
         $userData['email'] = strtolower($userData['email']);
 
-        LdapAttribute::setAttribute($entry, 'cn', $userData['username']);
+        LdapAttribute::setAttribute($entry, 'cn', $userData['samAccountName']);
         LdapAttribute::setAttribute($entry, 'mail', $userData['email']);
         LdapAttribute::setAttribute($entry, 'objectClass', 'User');
-        LdapAttribute::setAttribute($entry, 'samAccountName', $userData['username']);
+        LdapAttribute::setAttribute($entry, 'samAccountName', $userData['samAccountName']);
         LdapAttribute::setAttribute($entry, 'displayName', $userData['nickname']);
         LdapAttribute::setPassword($entry, $newPassword, LdapAttribute::PASSWORD_UNICODEPWD);
         LdapAttribute::setAttribute($entry, 'userAccountControl', 512);
 
-        return $this->getLdap()->save($this->getUserDn($userData['userName']), $entry);
+        return $this->getLdap()->save($this->getUserDn($userData['samAccountName']), $entry);
     }
 
     /**
-     * @param $username
+     * @param $samAccountName
      * @param $password
      * @param string $redirect
      * @return bool
      */
-    public function authenticate($username, $password, $redirect = '')
+    public function authenticate($samAccountName, $password, $redirect = '')
     {
         /** @var \Zend\Authentication\AuthenticationService $authService */
         $authService = $this->getServiceLocator()->get('service/auth');
         /** @var \Zend\Authentication\Adapter\Ldap $ldapAuthAdapter */
         $ldapAuthAdapter = $this->getServiceLocator()->get('ldap_auth_adapter');
 
-        $username = strtolower($username);
-        $result = $ldapAuthAdapter->setIdentity($username)->setCredential($password)->authenticate();
+        $samAccountName = strtolower($samAccountName);
+        $result = $ldapAuthAdapter->setIdentity($samAccountName)->setCredential($password)->authenticate();
         if ($result->isValid()) {
             $authService->getStorage()->write($ldapAuthAdapter->getAccountObject());
             /** @todo: get redirect helper and use it to redirect */
@@ -158,24 +158,24 @@ class LdapMapper implements ServiceLocatorAwareInterface
     }
 
     /**
-     * @param $username
+     * @param $samAccountName
      * @param $groupName
      * @return Ldap
      * @throws LdapException
      */
-    public function addUserToGroup($username, $groupName)
+    public function addUserToGroup($samAccountName, $groupName)
     {
-        $entry = ["member" => $this->getUserDn($username)];
+        $entry = ["member" => $this->getUserDn($samAccountName)];
         return $this->getLdap()->update($this->getGroupDn($groupName), $entry);
 //        $result = @ldap_mod_add($this->connection, $this->getGroupDn($groupName), $entry);
     }
 
-    public function removeUserFromGroup($username, $groupName)
+    public function removeUserFromGroup($samAccountName, $groupName)
     {
 
     }
 
-    public function removeUser($username)
+    public function removeUser($samAccountName)
     {
 
     }
