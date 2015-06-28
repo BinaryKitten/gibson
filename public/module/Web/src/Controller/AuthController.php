@@ -53,8 +53,9 @@ class AuthController extends AbstractActionController
                         $wpResult = $wpAdapter->setIdentity($username)->setCredential($password)->authenticate();
 
                         if ($wpResult->isValid()) {
-                            $wpUser = $wpAdapter->getResultRowObject(null, array('user_pass'));
-                            $this->wpSession['wpUser'] = $wpUser;
+                            $authResultObject = $wpAdapter->getResultRowObject(null, array('user_pass'));
+
+                            $this->wpSession['wpUser'] = $authResultObject;
                             return $this->redirect()->toRoute('login/migrate'); //return redirection object
                         } else {
                             $this->flashMessenger()->addMessage('The username and/or password is invalid');
@@ -80,6 +81,9 @@ class AuthController extends AbstractActionController
         }
         /** @var WPUser $wpUser */
         $wpUser = $this->wpSession->wpUser;
+        /** @var \Application\Mapper\WPUserMapper $wpUserMapper */
+        $wpUserMapper = $this->getServiceLocator()->get('Application\Mapper\WPUserMapper');
+        $wpUser = $wpUserMapper->convertAuthResult($wpUser);
 
 //        return $this->getResponse()->setContent(var_export($wpUser, true));
 
@@ -98,21 +102,9 @@ class AuthController extends AbstractActionController
 
             if ($prg) {
                 $form->setData($prg);
-                $x = $form->getInputFilter();
-//                $d = \Zend\Debug\Debug::dump($x, 'inputFilter', false);
                 if ($form->isValid()) {
-//                    $this->flashMessenger()->addMessage('flop');
-//                    $this->flashMessenger()->addMessage($d);
-//                    return $this->redirect()->refresh();
-
-                    /** @var \Web\Mapper\WPUserMetaMapper $wpMeta */
-                    $wpMeta = $this->getServiceLocator()->get('Application\Mapper\WPUserMetaMapper');
-//            $groups = unserialize($wpMeta->getMetaForUser($wpUser, 'wp_capabilities')->meta_value);
-                    $rfid = $wpMeta->getMetaForUser($wpUser, 'rfid_code')->meta_value;
+                    $roles = $wpUser->roles;
                     $newPassword = $form->get('password')->getValue();
-//
-//
-////                            $ldap = $ldapAdapter->getLdap();
 
                     /** @var UserRFIDMapper $rfidDataMapper */
                     $rfidDataMapper = $this->getServiceLocator()->get('Application\Mapper\UserRFID');
@@ -127,18 +119,15 @@ class AuthController extends AbstractActionController
                     try {
                         $userDataMapper->createUser($wpUser);
                     } catch(\Exception $e) {
-                        \Zend\Debug\Debug::dump($e);
+//                        \Zend\Debug\Debug::dump($e);
                     }
 
                     /** @var \Application\Mapper\LdapMapper $ldapMapper */
                     $ldapMapper = $this->getServiceLocator()->get('Application\Mapper\Ldap');
 
-                    $ldapMapper->createUser($wpUser, $form->getData()['password']);
+                    $ldapMapper->createUser($wpUser, $newPassword);
 
                     die();
-
-
-
 
 //                    return $this->redirect()->refresh();
 //                    $dn = $ldap->getCanonicalAccountName($username, ZendLdap::ACCTNAME_FORM_DN);

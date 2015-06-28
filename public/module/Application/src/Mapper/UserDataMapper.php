@@ -89,6 +89,7 @@ class UserDataMapper extends AbstractDbMapper implements ServiceLocatorAwareInte
         $dte->add(new \DateInterval('P6M'));
         $processData['medical_information_expiry'] = $dte->format(DATE_ISO8601);
         $processData['emergency_details_expiry'] = $dte->format(DATE_ISO8601);
+        $processData['samAccountName'] = strtolower($processData['samAccountName']);
         return $this->insert($processData);;
     }
 

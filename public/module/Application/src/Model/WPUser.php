@@ -74,7 +74,7 @@ class WPUser implements ServiceLocatorAwareInterface
     function __get($name)
     {
         /** @var WPUserMetaMapper $wpMetaMapper */
-        $wpMetaMapper = $this->getServiceLocator()->get('Web\Mapper\WPUserMetaMapper');
+        $wpMetaMapper = $this->getServiceLocator()->get('Application\Mapper\WPUserMetaMapper');
 
         if (empty($this->metaData)) {
             $this->metaData = $wpMetaMapper->getMetaForUser($this);

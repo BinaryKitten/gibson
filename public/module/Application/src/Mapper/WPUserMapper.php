@@ -43,4 +43,13 @@ class WPUserMapper extends AbstractDbMapper
             return $result;
         }
     }
+
+    /**
+     * @param $authObject
+     * @return object
+     */
+    public function convertAuthResult($authObject)
+    {
+        return $this->getHydrator()->hydrate((array)$authObject, clone $this->getEntityPrototype());
+    }
 }

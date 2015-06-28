@@ -15,9 +15,16 @@ class UserRFIDMapper extends AbstractDbMapper
      */
     protected $tableName = 'gibson_user_rfid';
 
+    /**
+     * @param $user
+     * @param $rfid
+     * @param string $description
+     * @param bool $enabled
+     * @return \Zend\Db\Adapter\Driver\ResultInterface
+     */
     public function addRFIDtoUser($user, $rfid, $description = '', $enabled = true)
     {
-       $samAccountName = $this->getSamAccountNameFromUser($user);
+        $samAccountName = $this->getSamAccountNameFromUser($user);
 
         $data = [
             'rfidCode' => $rfid,
@@ -26,11 +33,11 @@ class UserRFIDMapper extends AbstractDbMapper
             'enabled' => (int)$enabled,
         ];
         try {
-            $result = $this->insert($data);
+            return $this->insert($data);
         } catch(InvalidQueryException $queryException) {
             throw RFIDException::getRFIDExceptionFromQueryException($queryException);
         }
-        \Zend\Debug\Debug::dump($result);
+
     }
 
     protected function getSamAccountNameFromUser($user)
@@ -46,6 +53,6 @@ class UserRFIDMapper extends AbstractDbMapper
         if (!isset($samAccountName)) {
             throw new \InvalidArgumentException('Cannot Discern samAccountName from User Object/Data');
         }
-        return $samAccountName;
+        return strtolower($samAccountName);
     }
 }

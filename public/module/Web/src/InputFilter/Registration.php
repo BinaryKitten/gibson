@@ -9,7 +9,6 @@
 namespace Web\InputFilter;
 
 use Zend\I18n\Validator\PhoneNumber;
-use Zend\I18n\Validator\PostCode;
 use Zend\InputFilter\Input;
 use Zend\InputFilter\InputFilter;
 use Zend\Validator\Db\NoRecordExists as NoRecordExistsValidator;
@@ -18,6 +17,7 @@ use Zend\Validator\Identical;
 use Zend\Validator\NotEmpty;
 use Zend\Validator\Regex as RegexValidator;
 use Zend\Db\Adapter\Adapter as DbAdapter;
+use Zend\Validator\StringLength as StringLengthValidator;
 
 
 class Registration extends InputFilter
@@ -59,6 +59,11 @@ class Registration extends InputFilter
             RegexValidator::NOT_MATCH => 'Your Password does not meet required complexity',
             RegexValidator::INVALID => 'Your Password does not meet required complexity',
             RegexValidator::ERROROUS => 'Your Password does not meet required complexity',
+        ]);
+
+        $minLength = new StringLengthValidator(['min' => 7]);
+        $minLength->setMessages([
+            StringLengthValidator::TOO_SHORT => 'Your Password is too short, Please enter a password at least 7 characters in length'
         ]);
 
         $inputs['password']

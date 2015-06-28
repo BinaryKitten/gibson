@@ -17,6 +17,7 @@ use Zend\InputFilter\InputFilter;
 use Zend\Validator\Identical;
 use Zend\Validator\NotEmpty;
 use Zend\Validator\Regex as RegexValidator;
+use Zend\Validator\StringLength as StringLengthValidator;
 
 class LdapMigrate extends ZendForm
 {
@@ -60,11 +61,17 @@ class LdapMigrate extends ZendForm
             RegexValidator::ERROROUS => 'Your Password does not meet required complexity',
         ]);
 
+        $minLength = new StringLengthValidator(['min' => 7]);
+        $minLength->setMessages([
+           StringLengthValidator::TOO_SHORT => 'Your Password is too short, Please enter a password at least 7 characters in length'
+        ]);
+
         $password
             ->setName('password')
             ->setRequired(true)
             ->getValidatorChain()
                 ->attach($notEmptyValidator1)
+                ->attach($minLength)
                 ->attach($ldapPasswordComplexity)
         ;
 
