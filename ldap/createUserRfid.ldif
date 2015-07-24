@@ -8,3 +8,4 @@ samAccountName: demouser
 cn: demouser
 givenName: Demo
 sn: User
+rfidCode: ABCDEF012345
