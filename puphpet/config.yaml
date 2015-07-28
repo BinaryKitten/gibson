@@ -9,7 +9,10 @@ vagrantfile:
         chosen_provider: virtualbox
         network:
             private_network: 192.0.2.100
-            forwarded_port: {  }
+            forwarded_port:
+                vflnp_rimpiknj515o:
+                    host: '389'
+                    guest: '389'
         post_up_message: ''
         provider:
             virtualbox:
