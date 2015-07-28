@@ -2,8 +2,8 @@
 namespace Web;
 
 return [
-    'home' => [
-        'type' => 'Zend\Mvc\Router\Http\Literal',
+    'home'     => [
+        'type'    => 'Zend\Mvc\Router\Http\Literal',
         'options' => [
             'route'    => '/',
             'defaults' => [
@@ -12,31 +12,31 @@ return [
             ],
         ],
     ],
-    'login' => [
-        'type' => 'segment',
-        'options' => [
-            'route' => '/login',
+    'login'    => [
+        'type'          => 'segment',
+        'options'       => [
+            'route'    => '/login',
             'defaults' => [
-                'controller'    => Controller\AuthController::class,
-                'action'        => 'login',
+                'controller' => Controller\AuthController::class,
+                'action'     => 'login',
             ]
         ],
         'may_terminate' => true,
-        'child_routes' => [
+        'child_routes'  => [
             'migrate' => [
-                'type' => 'Segment',
+                'type'    => 'Segment',
                 'options' => [
-                    'route' => '/migrate',
+                    'route'    => '/migrate',
                     'defaults' => [
                         'controller' => Controller\AuthController::class,
-                        'action' => 'migrate'
+                        'action'     => 'migrate'
                     ],
                 ],
             ],
         ],
     ],
-    'logout' => [
-        'type' => 'Literal',
+    'logout'   => [
+        'type'    => 'Literal',
         'options' => [
             'route'    => '/logout',
             'defaults' => [
@@ -46,7 +46,7 @@ return [
         ],
     ],
     'register' => [
-        'type' => 'Literal',
+        'type'    => 'Literal',
         'options' => [
             'route'    => '/register',
             'defaults' => [
@@ -55,29 +55,14 @@ return [
             ],
         ],
     ],
-    /*'login' => [
-        'type'    => 'Literal',
+    'ldap'     => [
+        'type'    => 'Segment',
         'options' => [
-            'route'    => '/login',
+            'route'    => '/ldap/[:action]',
             'defaults' => [
-                'controller'    => Controller\AuthController::class,
-                'action'        => 'login',
-            ],
-            'may_terminate' =>  true,
-            'child_routes' => [
-                'migrate' => [
-                    'type' => 'Literal',
-                    'options' => [
-                        'route' => '/migrate',
-                        'defaults' => [
-                            'controller' => Controller\AuthController::class,
-                            'action' => 'migrate'
-                        ]
-                    ]
-                ]
+                'controller' => Controller\LdapController::class,
+                'action'     => 'index'
             ]
-        ],
-
-    ],*/
-
+        ]
+    ]
 ];

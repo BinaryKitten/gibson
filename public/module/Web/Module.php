@@ -9,15 +9,14 @@
 
 namespace Web;
 
-use SebastianBergmann\Environment\Console;
+use Application\Model\WPUser as WPUserModel;
+use Application\Model\WPUserMeta as WPUserMetaModel;
 use Web\Form\Login as LoginForm;
 use Web\Form\Registration as RegistrationForm;
 use Web\InputFilter\Registration as RegistrationInputFilter;
 use Web\Mapper\LdapMapper;
 use Web\Mapper\WPUser as WPUserMapper;
 use Web\Mapper\WPUserMeta as WPUserMetaMapper;
-use Application\Model\WPUser as WPUserModel;
-use Application\Model\WPUserMeta as WPUserMetaModel;
 use Zend\Authentication\AuthenticationService;
 use Zend\Authentication\Storage\Session as AuthenticationSessionStorage;
 use Zend\Console\Request as ConsoleRequest;
@@ -39,13 +38,13 @@ class Module
     public function getServiceConfig()
     {
         return [
-            'aliases' => [
+            'aliases'   => [
                 'Zend\Authentication\AuthenticationService' => 'service/auth',
             ],
             'factories' => [
-                'service/auth' => [$this, 'factory_service_auth'],
-                'form/loginform' => [$this, 'factory_form_login'],
-                'form/migration' => [$this, 'factory_form_migration'],
+                'service/auth'      => [$this, 'factory_service_auth'],
+                'form/loginform'    => [$this, 'factory_form_login'],
+                'form/migration'    => [$this, 'factory_form_migration'],
                 'form/registration' => [$this, 'factory_form_registration'],
             ]
         ];
@@ -64,7 +63,7 @@ class Module
      */
     public function onBootstrap(MvcEvent $e)
     {
-        $eventManager = $e->getApplication()->getEventManager();
+        $eventManager        = $e->getApplication()->getEventManager();
         $moduleRouteListener = new ModuleRouteListener();
         $moduleRouteListener->attach($eventManager);
 
@@ -79,13 +78,13 @@ class Module
     public function setViewScripts(MvcEvent $e)
     {
         $controller = $e->getTarget();
-        $request = $controller->getRequest();
+        $request    = $controller->getRequest();
         if ($request instanceof ConsoleRequest) {
             return;
         }
 
         $serviceManager = $e->getApplication()->getServiceManager();
-        $viewRenderer = $serviceManager->get('Zend\View\Renderer\RendererInterface');
+        $viewRenderer   = $serviceManager->get('Zend\View\Renderer\RendererInterface');
 
         /** @var HeadScriptViewHelper $headScriptViewHelper */
         $headScriptViewHelper = $viewRenderer->headScript();
@@ -97,26 +96,27 @@ class Module
         $headLinkViewHelper = $viewRenderer->headLink();
 
         $headLinkViewHelper([
-            'rel' => 'shortcut icon', 'type' => 'image/vnd.microsoft.icon',
+            'rel'  => 'shortcut icon',
+            'type' => 'image/vnd.microsoft.icon',
             'href' => $viewRenderer->basePath() . '/favicon.ico'
         ])
 //            ->prependStylesheet($renderer->basePath('application/css/style.css'))
             ->prependStylesheet($viewRenderer->basePath('css/bootstrap-theme.min.css'))
-            ->prependStylesheet($viewRenderer->basePath('css/bootstrap.min.css'))
-        ;
+            ->prependStylesheet($viewRenderer->basePath('css/bootstrap.min.css'));
 
         $headScriptViewHelper
             ->appendFile("/js/jquery.min.js")
             ->appendFile("/js/bootstrap.min.js")
-            ->appendFile("/application/js/script.js")
-        ;
+            ->appendFile("/application/js/script.js");
 
         $placeHolderViewHelper->set($headScriptViewHelper->__toString());
 
         $headScriptViewHelper->exchangeArray([]);
 
-        $headScriptViewHelper->appendFile('https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js', 'text/javascript', ['conditional' => 'lt IE 9']);
-        $headScriptViewHelper->appendFile('https://oss.maxcdn.com/respond/1.4.2/respond.min.js', 'text/javascript', ['conditional' => 'lt IE 9']);
+        $headScriptViewHelper->appendFile('https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js', 'text/javascript',
+            ['conditional' => 'lt IE 9']);
+        $headScriptViewHelper->appendFile('https://oss.maxcdn.com/respond/1.4.2/respond.min.js', 'text/javascript',
+            ['conditional' => 'lt IE 9']);
 
         $viewRenderer->headTitle('HacMan - Membership System');
     }
@@ -127,17 +127,18 @@ class Module
     public function require_login(MvcEvent $e)
     {
         $controller = $e->getTarget();
-        $request = $controller->getRequest();
+        $request    = $controller->getRequest();
         /** @var AuthenticationService $authService */
         $authService = $e->getApplication()->getServiceManager()->get('service/auth');
 
         // Skip ACL checks for Console based requests
-        if (!$request instanceof ConsoleRequest) {
-            $matchedRoute = $controller->getEvent()->getRouteMatch()->getMatchedRouteName();
-            $allowedRoutes = array('login', 'login/migrate', 'logout', 'register');
+        if ( ! $request instanceof ConsoleRequest) {
+            $matchedRoute  = $controller->getEvent()->getRouteMatch()->getMatchedRouteName();
+            $allowedRoutes = array('login', 'login/migrate', 'logout', 'register', 'ldap');
             if (in_array($matchedRoute, $allowedRoutes) || $authService->hasIdentity()) {
                 return; // they're logged in or on the login page, allow
             }
+
             // otherwise, redirect to the login page
             return $controller->redirect()->toRoute('login');
         }
@@ -145,6 +146,7 @@ class Module
 
     /**
      * @param ServiceManager $sm
+     *
      * @return LoginForm
      */
     public function factory_form_login(ServiceManager $sm)
@@ -154,6 +156,7 @@ class Module
 
     /**
      * @param ServiceManager $sm
+     *
      * @return Form\LdapMigrate
      */
     public function factory_form_migration(ServiceManager $sm)
@@ -163,6 +166,7 @@ class Module
 
     /**
      * @param ServiceManager $sm
+     *
      * @return AuthenticationService
      */
     public function factory_service_auth(ServiceManager $sm)
@@ -172,6 +176,7 @@ class Module
 
     /**
      * @param ServiceManager $sm
+     *
      * @return WPUser
      */
     public function factory_mapper_wpuser(ServiceManager $sm)
@@ -180,11 +185,13 @@ class Module
         $class->setDbAdapter($sm->get('Zend\Db\Adapter\Adapter'));
         $class->setEntityPrototype(new WPUserModel());
         $class->setHydrator(new ObjectPropertyHydrator());
+
         return $class;
     }
 
     /**
      * @param ServiceManager $sm
+     *
      * @return WPUserMeta
      */
     public function factory_mapper_wpusermeta(ServiceManager $sm)
@@ -193,18 +200,21 @@ class Module
         $class->setDbAdapter($sm->get('Zend\Db\Adapter\Adapter'));
         $class->setEntityPrototype(new WPUserMetaModel());
         $class->setHydrator(new ObjectPropertyHydrator());
+
         return $class;
     }
 
     /**
      * @param ServiceManager $sm
+     *
      * @return RegistrationForm
      */
     public function factory_form_registration(ServiceManager $sm)
     {
-        $form = new RegistrationForm();
+        $form               = new RegistrationForm();
         $registrationFilter = new RegistrationInputFilter($sm->get('Zend\Db\Adapter\Adapter'));
         $form->setInputFilter($registrationFilter);
+
         return $form;
     }
 
